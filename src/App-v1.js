@@ -50,18 +50,16 @@ const tempWatchedData = [
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
-const KEY = "ef13ec75b84c3ef3651b719303de03bf";
+const KEY = "bb4b82b0";
 
 // structural component
 export default function App() {
-  const [watched, setWatched] = useState(tempWatchedData);
-  const [movies, setMovies] = useState(tempMovieData);
+  const [watched, setWatched] = useState([]);
+  const [movies, setMovies] = useState([]);
 
-  fetch(
-    `https://api.themoviedb.org/3/search/movie?api_key=${KEY}&query=interstellar&include_adult=false&language=en-US&page=1`
-  )
+  fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`)
     .then((response) => response.json())
-    .then((response) => console.log(response));
+    .then((response) => setMovies(response.Search));
 
   return (
     <>
