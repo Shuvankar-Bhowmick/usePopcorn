@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import StarRating from "./StarRating.js";
 
-const average = (arr) =>
+const average = arr =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 const KEY = "bb4b82b0";
@@ -10,13 +10,18 @@ const KEY = "bb4b82b0";
 export default function App() {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
 
+  /* Only executed once in the initial render after the app loads*/
+  const [watched, setWatched] = useState(function () {
+    const storedValue = localStorage.getItem("watched");
+    return JSON.parse(storedValue);
+  });
+
   function handleSelectMovie(id) {
-    setSelectedId((selectedId) => (id === selectedId ? null : id));
+    setSelectedId(selectedId => (id === selectedId ? null : id));
   }
 
   function handleCloseMovie() {
@@ -24,12 +29,21 @@ export default function App() {
   }
 
   function handleAddWatched(movie) {
-    setWatched((watched) => [...watched, movie]);
+    setWatched(watched => [...watched, movie]);
+
+    // localStorage.setItem("watched", JSON.stringify([...watched, movie]));
   }
 
   function handleDeleteWatched(id) {
-    setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
+    setWatched(watched => watched.filter(movie => movie.imdbID !== id));
   }
+
+  useEffect(
+    function () {
+      localStorage.setItem("watched", JSON.stringify(watched));
+    },
+    [watched]
+  );
 
   useEffect(
     function () {
@@ -161,7 +175,7 @@ function Search({ query, setQuery }) {
       type="text"
       placeholder="Search movies..."
       value={query}
-      onChange={(e) => setQuery(e.target.value)}
+      onChange={e => setQuery(e.target.value)}
     />
   );
 }
@@ -175,9 +189,9 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const [isLoading, setIsLoading] = useState(false);
   const [userRating, setUserRating] = useState(0);
 
-  const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
+  const isWatched = watched.map(movie => movie.imdbID).includes(selectedId);
   const watchedUserRating = watched.find(
-    (movie) => movie.imdbID === selectedId
+    movie => movie.imdbID === selectedId
   )?.userRating;
 
   const {
@@ -192,6 +206,16 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     Director: director,
     Genre: genre,
   } = movie;
+
+  // const [isTop, setIsTop] = useState(imdbRating > 8);
+  // console.log(isTop);
+  // useEffect(() => {
+  //   setIsTop(imdbRating > 8);
+  // }, [imdbRating]);
+
+  const isTop = imdbRating > 8;
+  console.log(isTop);
+  const [avgRating, setAvgRating] = useState(0);
 
   function handleAdd() {
     const newWatchedMovie = {
@@ -249,7 +273,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
       // Example of closure here: title is remembered even after the component is unmounted and states are destroyed.
       return function () {
         document.title = "usePopcorn";
-        // console.log(`Clean up effect for movie ${title}`);
       };
     },
     [title]
@@ -278,7 +301,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
               </p>
             </div>
           </header>
-
           <section>
             <div className="rating">
               {!isWatched ? (
@@ -317,7 +339,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
 function WatchedMovieList({ watched, onDeleteWatched }) {
   return (
     <ul className="list">
-      {watched.map((movie) => (
+      {watched.map(movie => (
         <WatchedMovie
           movie={movie}
           key={movie.imdbID}
@@ -360,13 +382,13 @@ function WatchedMovie({ movie, onDeleteWatched }) {
 }
 
 function WatchedSummary({ watched }) {
-  const avgImdbRating = average(
-    watched.map((movie) => movie.imdbRating)
-  ).toFixed(1);
-  const avgUserRating = average(
-    watched.map((movie) => movie.userRating)
-  ).toFixed(1);
-  const avgRuntime = Math.round(average(watched.map((movie) => movie.runtime)));
+  const avgImdbRating = average(watched.map(movie => movie.imdbRating)).toFixed(
+    1
+  );
+  const avgUserRating = average(watched.map(movie => movie.userRating)).toFixed(
+    1
+  );
+  const avgRuntime = Math.round(average(watched.map(movie => movie.runtime)));
 
   return (
     <div className="summary">
@@ -398,7 +420,7 @@ function Box({ children }) {
 
   return (
     <div className="box">
-      <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
+      <button className="btn-toggle" onClick={() => setIsOpen(open => !open)}>
         {isOpen ? "–" : "+"}
       </button>
 
@@ -409,7 +431,7 @@ function Box({ children }) {
 function MovieList({ movies, onSelectMovie }) {
   return (
     <ul className="list list-movies">
-      {movies?.map((movie) => (
+      {movies?.map(movie => (
         <Movie movie={movie} key={movie.imdbID} onSelectMovie={onSelectMovie} />
       ))}
     </ul>
