@@ -17,7 +17,7 @@ export default function App() {
   /* Only executed once in the initial render after the app loads*/
   const [watched, setWatched] = useState(function () {
     const storedValue = localStorage.getItem("watched");
-    return JSON.parse(storedValue);
+    return storedValue ? JSON.parse(storedValue) : [];
   });
 
   function handleSelectMovie(id) {
@@ -215,7 +215,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
 
   const isTop = imdbRating > 8;
   console.log(isTop);
-  const [avgRating, setAvgRating] = useState(0);
 
   function handleAdd() {
     const newWatchedMovie = {
